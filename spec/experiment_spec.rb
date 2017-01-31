@@ -20,4 +20,16 @@ RSpec.describe GovukAbTesting::Experiment do
       expect(experiment.analytics_meta_tag).to eql("<meta name=\"govuk:ab-test\" content=\"Education:A\">")
     end
   end
+
+  describe '#add_response_header' do
+    it "sets the correct header" do
+      activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
+      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      response = double(headers: {})
+
+      experiment.add_response_header(response)
+
+      expect(response.headers['Vary']).to eql('GOVUK-ABTest-Education')
+    end
+  end
 end
