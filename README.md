@@ -37,7 +37,7 @@ Let's say you have this controller:
 class PartyController < ApplicationController
   def show
     @ab_test = GovukAbTesting::Experiment.new("your_experiment_name", request)
-    @ab_test.set_response_headers(response)
+    @ab_test.add_response_header(response)
 
     if @ab_test.variant_b?
       render "new_show_template_to_be_tested"
