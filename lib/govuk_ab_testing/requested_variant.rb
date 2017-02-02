@@ -1,5 +1,5 @@
 module GovukAbTesting
-  class Experiment
+  class RequestedVariant
     attr_reader :ab_test, :request
 
     delegate :request_header, :cookie_name, :response_header, to: :ab_test

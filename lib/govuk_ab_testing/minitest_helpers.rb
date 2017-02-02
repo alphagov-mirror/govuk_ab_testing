@@ -14,7 +14,7 @@ module GovukAbTesting
     end
 
     def assert_ab_test_rendered(experiment_name)
-      experiment = GovukAbTesting::Experiment.new(experiment_name, @request)
+      experiment = GovukAbTesting::RequestedVariant.new(experiment_name, @request)
 
       assert_equal experiment.response_header, response.headers['Vary']
       assert_meta_tag "govuk:ab-test", experiment.cookie_name + ':' + experiment.variant_name

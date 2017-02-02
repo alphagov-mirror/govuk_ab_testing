@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-RSpec.describe GovukAbTesting::Experiment do
+RSpec.describe GovukAbTesting::RequestedVariant do
   describe '#variant_name' do
     it "returns the variant" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
 
-      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      requested_variant = GovukAbTesting::RequestedVariant.new("education", activesupport_request)
 
-      expect(experiment.variant_name).to eql("A")
+      expect(requested_variant.variant_name).to eql("A")
     end
   end
 
@@ -15,10 +15,10 @@ RSpec.describe GovukAbTesting::Experiment do
     it "returns the variant" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
 
-      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      requested_variant = GovukAbTesting::RequestedVariant.new("education", activesupport_request)
 
-      expect(experiment.variant_a?).to eql(true)
-      expect(experiment.variant_b?).to eql(false)
+      expect(requested_variant.variant_a?).to eql(true)
+      expect(requested_variant.variant_b?).to eql(false)
     end
   end
 
@@ -26,10 +26,10 @@ RSpec.describe GovukAbTesting::Experiment do
     it "returns the variant" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'B'})
 
-      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      requested_variant = GovukAbTesting::RequestedVariant.new("education", activesupport_request)
 
-      expect(experiment.variant_a?).to eql(false)
-      expect(experiment.variant_b?).to eql(true)
+      expect(requested_variant.variant_a?).to eql(false)
+      expect(requested_variant.variant_b?).to eql(true)
     end
   end
 
@@ -37,7 +37,7 @@ RSpec.describe GovukAbTesting::Experiment do
     it "returns the tag" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
 
-      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      experiment = GovukAbTesting::RequestedVariant.new("education", activesupport_request)
 
       expect(experiment.analytics_meta_tag).to eql("<meta name=\"govuk:ab-test\" content=\"Education:A\">")
     end
@@ -46,7 +46,7 @@ RSpec.describe GovukAbTesting::Experiment do
   describe '#add_response_header' do
     it "sets the correct header" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
-      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+      experiment = GovukAbTesting::RequestedVariant.new("education", activesupport_request)
       response = double(headers: {})
 
       experiment.add_response_header(response)
