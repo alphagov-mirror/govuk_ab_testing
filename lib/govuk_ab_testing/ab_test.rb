@@ -1,14 +1,14 @@
 module GovukAbTesting
   class AbTest
-    attr_reader :experiment_name
+    attr_reader :ab_test_name
 
-    def initialize(experiment_name)
-      @experiment_name = experiment_name
+    def initialize(ab_test_name)
+      @ab_test_name = ab_test_name
     end
 
     # Internal name of the header
     def request_header
-      "HTTP_GOVUK_ABTEST_#{experiment_name.upcase}"
+      "HTTP_GOVUK_ABTEST_#{ab_test_name.upcase}"
     end
 
     def response_header
@@ -17,7 +17,7 @@ module GovukAbTesting
 
     # `example` -> `Example`
     def cookie_name
-      experiment_name.capitalize
+      ab_test_name.capitalize
     end
   end
 end

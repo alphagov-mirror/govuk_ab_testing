@@ -36,10 +36,10 @@ Let's say you have this controller:
 # app/controllers/party_controller.rb
 class PartyController < ApplicationController
   def show
-    @ab_test = GovukAbTesting::RequestedVariant.new("your_experiment_name", request)
-    @ab_test.add_response_header(response)
+    @requested_variant = GovukAbTesting::RequestedVariant.new("your_ab_test_name", request)
+    @requested_variant.add_response_header(response)
 
-    if @ab_test.variant_b?
+    if @requested_variant.variant_b?
       render "new_show_template_to_be_tested"
     else
       render "show"
@@ -54,7 +54,7 @@ by the extension and analytics.
 ```html
 <!-- application.html.erb -->
 <head>
-  <%= @ab_test.analytics_meta_tag.html_safe %>
+  <%= @requested_variant.analytics_meta_tag.html_safe %>
 </head>
 ```
 
@@ -66,7 +66,7 @@ class PartyControllerTest < ActionController::TestCase
   include GovukAbTesting::MinitestHelpers
 
   should "show the user the B version" do
-    with_variant your_experiment_name: "B" do
+    with_variant your_ab_test_name: "B" do
       get :show
 
       assert_rendered "new_show_template_to_be_tested"

@@ -2,11 +2,11 @@ module GovukAbTesting
   class RequestedVariant
     attr_reader :ab_test, :request
 
-    # @param experiment_name [String] Lowercase experiment name, like `example`
+    # @param ab_test_name [String] Lowercase A/B test name, like `example`
     # @param request [ApplicationController::Request] the `request` in the
     # controller.
-    def initialize(experiment_name, request)
-      @ab_test = AbTest.new(experiment_name)
+    def initialize(ab_test_name, request)
+      @ab_test = AbTest.new(ab_test_name)
       @request = request
     end
 

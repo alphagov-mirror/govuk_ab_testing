@@ -1,23 +1,23 @@
 module GovukAbTesting
   module MinitestHelpers
     def with_variant(args)
-      experiment_name, variant = args.first
+      ab_test_name, variant = args.first
 
-      experiment = GovukAbTesting::AbTest.new(experiment_name)
+      ab_test = GovukAbTesting::AbTest.new(ab_test_name)
 
-      previous_variant = @request.headers[experiment.request_header]
-      @request.headers[experiment.request_header] = variant
+      previous_variant = @request.headers[ab_test.request_header]
+      @request.headers[ab_test.request_header] = variant
 
       yield
 
-      @request.headers[experiment.request_header] = previous_variant
+      @request.headers[ab_test.request_header] = previous_variant
     end
 
-    def assert_ab_test_rendered(experiment_name)
-      experiment = GovukAbTesting::RequestedVariant.new(experiment_name, @request)
+    def assert_ab_test_rendered(ab_test_name)
+      requested_variant = GovukAbTesting::RequestedVariant.new(ab_test_name, @request)
 
-      assert_equal experiment.response_header, response.headers['Vary']
-      assert_meta_tag "govuk:ab-test", experiment.cookie_name + ':' + experiment.variant_name
+      assert_equal requested_variant.response_header, response.headers['Vary']
+      assert_meta_tag "govuk:ab-test", requested_variant.cookie_name + ':' + requested_variant.variant_name
     end
 
   private
