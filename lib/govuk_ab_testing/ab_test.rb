@@ -18,11 +18,11 @@ module GovukAbTesting
     end
 
     def response_header
-      "GOVUK-ABTest-#{cookie_name}"
+      "GOVUK-ABTest-#{meta_tag_name}"
     end
 
     # `example` -> `Example`
-    def cookie_name
+    def meta_tag_name
       ab_test_name.capitalize
     end
   end

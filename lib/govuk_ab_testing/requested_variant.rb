@@ -39,7 +39,7 @@ module GovukAbTesting
     #
     # @return [String]
     def analytics_meta_tag
-      '<meta name="govuk:ab-test" content="' + ab_test.cookie_name + ':' + variant_name + '">'
+      '<meta name="govuk:ab-test" content="' + ab_test.meta_tag_name + ':' + variant_name + '">'
     end
   end
 end
