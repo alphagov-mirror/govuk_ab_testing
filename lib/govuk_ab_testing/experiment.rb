@@ -19,6 +19,16 @@ module GovukAbTesting
       request.headers[request_header] == "B" ? "B" : "A"
     end
 
+    # @return [Boolean] if the user is to be served variant A
+    def variant_a?
+      variant_name == "A"
+    end
+
+    # @return [Boolean] if the user is to be served variant B
+    def variant_b?
+      variant_name == "B"
+    end
+
     # Configure the response
     #
     # @param [ApplicationController::Response] the `response` in the controller

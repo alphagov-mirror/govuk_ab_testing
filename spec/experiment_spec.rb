@@ -11,6 +11,28 @@ RSpec.describe GovukAbTesting::Experiment do
     end
   end
 
+  describe '#variant_a?' do
+    it "returns the variant" do
+      activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
+
+      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+
+      expect(experiment.variant_a?).to eql(true)
+      expect(experiment.variant_b?).to eql(false)
+    end
+  end
+
+  describe '#variant_b?' do
+    it "returns the variant" do
+      activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'B'})
+
+      experiment = GovukAbTesting::Experiment.new("education", activesupport_request)
+
+      expect(experiment.variant_a?).to eql(false)
+      expect(experiment.variant_b?).to eql(true)
+    end
+  end
+
   describe '#analytics_meta_tag' do
     it "returns the tag" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
