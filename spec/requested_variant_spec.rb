@@ -57,5 +57,15 @@ RSpec.describe GovukAbTesting::RequestedVariant do
 
       expect(response.headers['Vary']).to eql('GOVUK-ABTest-Education')
     end
+
+    it "crashes if the Vary header is already set" do
+      activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
+      requested_variant = ab_test.requested_variant(activesupport_request)
+      response = double(headers: { 'Vary' => 'Some vary header set by someone else'})
+
+      expect {
+        requested_variant.configure_response(response)
+      }.to raise_error(StandardError)
+    end
   end
 end
