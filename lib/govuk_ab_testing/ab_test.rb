@@ -6,6 +6,12 @@ module GovukAbTesting
       @ab_test_name = ab_test_name
     end
 
+    # @param request [ApplicationController::Request] the `request` in the
+    # controller.
+    def requested_variant(request)
+      RequestedVariant.new(self, request)
+    end
+
     # Internal name of the header
     def request_header
       "HTTP_GOVUK_ABTEST_#{ab_test_name.upcase}"

@@ -36,7 +36,8 @@ Let's say you have this controller:
 # app/controllers/party_controller.rb
 class PartyController < ApplicationController
   def show
-    @requested_variant = GovukAbTesting::RequestedVariant.new("your_ab_test_name", request)
+    ab_test = GovukAbTesting::AbTest.new("your_ab_test_name")
+    @requested_variant = ab_test.requested_variant(request)
     @requested_variant.add_response_header(response)
 
     if @requested_variant.variant_b?
