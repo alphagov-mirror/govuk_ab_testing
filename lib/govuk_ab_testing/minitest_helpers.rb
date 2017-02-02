@@ -14,10 +14,11 @@ module GovukAbTesting
     end
 
     def assert_ab_test_rendered(ab_test_name)
-      requested_variant = GovukAbTesting::RequestedVariant.new(ab_test_name, @request)
+      ab_test = GovukAbTesting::AbTest.new(ab_test_name)
+      requested_variant = ab_test.requested_variant @request
 
-      assert_equal requested_variant.response_header, response.headers['Vary']
-      assert_meta_tag "govuk:ab-test", requested_variant.meta_tag_name + ':' + requested_variant.variant_name
+      assert_equal ab_test.response_header, response.headers['Vary']
+      assert_meta_tag "govuk:ab-test", ab_test.meta_tag_name + ':' + requested_variant.variant_name
     end
 
   private
