@@ -30,7 +30,7 @@ module GovukAbTesting
     # Configure the response
     #
     # @param [ApplicationController::Response] the `response` in the controller
-    def add_response_header(response)
+    def configure_response(response)
       response.headers['Vary'] = ab_test.response_header
     end
 

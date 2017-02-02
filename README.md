@@ -38,7 +38,7 @@ class PartyController < ApplicationController
   def show
     ab_test = GovukAbTesting::AbTest.new("your_ab_test_name")
     @requested_variant = ab_test.requested_variant(request)
-    @requested_variant.add_response_header(response)
+    @requested_variant.configure_response(response)
 
     if @requested_variant.variant_b?
       render "new_show_template_to_be_tested"

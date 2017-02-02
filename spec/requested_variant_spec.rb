@@ -47,13 +47,13 @@ RSpec.describe GovukAbTesting::RequestedVariant do
     end
   end
 
-  describe '#add_response_header' do
+  describe '#configure_response' do
     it "sets the correct header" do
       activesupport_request = double(headers: { 'HTTP_GOVUK_ABTEST_EDUCATION' => 'A'})
       requested_variant = ab_test.requested_variant(activesupport_request)
       response = double(headers: {})
 
-      requested_variant.add_response_header(response)
+      requested_variant.configure_response(response)
 
       expect(response.headers['Vary']).to eql('GOVUK-ABTest-Education')
     end
