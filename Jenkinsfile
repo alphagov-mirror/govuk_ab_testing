@@ -1,45 +1,143 @@
 #!/usr/bin/env groovy
 
-REPOSITORY = 'govuk_ab_testing'
+// Do we have a database?
+def hasDatabase() {
+  sh(script: "test -e config/database.yml", returnStatus: true) == 0
+}
 
-node {
+// If the project has Rails-style assets
+def hasAssets() {
+  sh(script: "test -d app/assets", returnStatus: true) == 0
+}
+
+def hasLint() {
+  sh(script: "grep 'govuk-lint' Gemfile.lock", returnStatus: true) == 0
+}
+
+def isGem() {
+  sh(script: "ls | grep gemspec", returnStatus: true) == 0
+}
+
+def govukBuild(sassLint = true) {
   def govuk = load '/var/lib/jenkins/groovy_scripts/govuk_jenkinslib.groovy'
 
+  repoName = JOB_NAME.split('/')[0]
+
+  properties([
+    buildDiscarder(
+      logRotator(
+        numToKeepStr: '50')
+      ),
+    [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    [$class: 'ParametersDefinitionProperty',
+      parameterDefinitions: [
+        [$class: 'BooleanParameterDefinition',
+          name: 'IS_SCHEMA_TEST',
+          defaultValue: false,
+          description: 'Identifies whether this build is being triggered to test a change to the content schemas'],
+        [$class: 'StringParameterDefinition',
+          name: 'SCHEMA_BRANCH',
+          defaultValue: 'deployed-to-production',
+          description: 'The branch of govuk-content-schemas to test against']]
+    ],
+  ])
+
   try {
-    stage('Checkout') {
+    govuk.initializeParameters([
+      'IS_SCHEMA_TEST': 'false',
+      'SCHEMA_BRANCH': 'deployed-to-production',
+    ])
+
+    if (!govuk.isAllowedBranchBuild(env.BRANCH_NAME)) {
+      return
+    }
+
+    stage("Checkout") {
       checkout scm
     }
 
-    stage('Clean') {
+    stage("Clean up workspace") {
       govuk.cleanupGit()
+    }
+
+    stage("git merge") {
       govuk.mergeMasterBranch()
     }
 
-    stage('Bundle') {
-      echo 'Bundling'
-      sh("bundle install --path ${JENKINS_HOME}/bundles/${JOB_NAME}")
+    stage("Configure environment") {
+      govuk.setEnvar("RAILS_ENV", "test")
+      govuk.setEnvar("RACK_ENV", "test")
     }
 
-    stage('Linter') {
-      govuk.rubyLinter()
+    stage("Set up content schema dependency") {
+      govuk.contentSchemaDependency(env.SCHEMA_BRANCH)
+      govuk.setEnvar("GOVUK_CONTENT_SCHEMAS_PATH", "tmp/govuk-content-schemas")
     }
 
-    stage('Tests') {
-      govuk.runTests()
+    stage("bundle install") {
+      if (isGem()) {
+        govuk.bundleGem()
+      } else {
+        govuk.bundleApp()
+      }
     }
 
-    if(env.BRANCH_NAME == "master") {
-      stage('Publish Gem') {
-        govuk.publishGem(REPOSITORY, env.BRANCH_NAME)
+    if (hasLint()) {
+      stage("rubylinter") {
+        govuk.rubyLinter()
+      }
+    } else {
+      echo "WARNING: You do not have Ruby linting turned on. Please install govuk-lint and enable."
+    }
+
+    if (hasAssets() && sassLint) {
+      stage("sasslinter") {
+        govuk.sassLinter()
+      }
+    } else {
+      echo "WARNING: You do not have SASS linting turned on. Please install govuk-lint and enable."
+    }
+
+    if (hasDatabase()) {
+      stage("Set up the DB") {
+        govuk.runRakeTask("db:drop db:create db:schema:load")
+      }
+    }
+
+    stage("Run tests") {
+      govuk.runTests("default")
+    }
+
+    if (hasAssets()) {
+      stage("Precompile assets") {
+        govuk.precompileAssets()
+      }
+    }
+
+    if (isGem()) {
+      stage("Publish Gem") {
+        govuk.publishGem(repoName, env.BRANCH_NAME)
+      }
+    } else {
+      stage("Push release tag") {
+        govuk.pushTag(repoName, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)
+      }
+
+      stage("Deploy to integration") {
+        govuk.deployIntegration(repoName, env.BRANCH_NAME, 'release', 'deploy')
       }
     }
 
   } catch (e) {
-    currentBuild.result = 'FAILED'
+    currentBuild.result = "FAILED"
     step([$class: 'Mailer',
           notifyEveryUnstableBuild: true,
           recipients: 'govuk-ci-notifications@digital.cabinet-office.gov.uk',
           sendToIndividuals: true])
     throw e
   }
+}
+
+node {
+  govukBuild()
 }
